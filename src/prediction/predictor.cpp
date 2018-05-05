@@ -36,7 +36,7 @@ void Predictor::update(const FusedObjectList &fused_object_list) {
     @param stepsize prediction time stepsize
     @param horizon prediction horizon
 */
-Predictor::PredictedObjectList Predictor::predict(const Predictor::FusedObjectList &fused_object_list, double t0, double stepsize, double horizon) {
+Predictor::PredictedObjectList Predictor::predict(const EgoVehicle &ego_vehicle, const Predictor::FusedObjectList &fused_object_list, double t0, double stepsize, double horizon) {
     // maneuver 01: keep lane
     return (this->*m_maneuver[KEEP_LANE])(fused_object_list, t0, stepsize, horizon);
     // maneuver 02: drive freespace

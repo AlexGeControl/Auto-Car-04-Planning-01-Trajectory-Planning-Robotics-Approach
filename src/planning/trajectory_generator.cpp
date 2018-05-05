@@ -36,9 +36,16 @@ TrajectoryGenerator::TrajectoryParams TrajectoryGenerator::generate_jerk_minimiz
 
     trajectory_params.T = end.timestamp - start.timestamp;
 
+    // rectify round trip behavior:
+    double rectified_start_s = start.s;
+    double rectified_end_s = end.s;
+    if (rectified_start_s > rectified_end_s) {
+        rectified_start_s -= 6945.554;
+    }
+
     trajectory_params.s = solve_jerk_minimized_trajectory(
-        start.s, start.vs, start.as,
-          end.s,   end.vs,   end.as,
+        rectified_start_s, start.vs, start.as,
+          rectified_end_s,   end.vs,   end.as,
         trajectory_params.T
     );
     trajectory_params.d = solve_jerk_minimized_trajectory(
@@ -92,6 +99,7 @@ std::vector<double> TrajectoryGenerator::solve_jerk_minimized_trajectory(
     
     // desired output:
     Eigen::VectorXd b(3);
+
     b <<  x1 - (x0 + vx0*T_exp[1] + 0.5*ax0*T_exp[2]),
          vx1 - (vx0 + ax0*T_exp[1]),
          ax1 - ax0;

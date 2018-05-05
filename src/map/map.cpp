@@ -3,8 +3,6 @@
 #include <fstream>
 #include <cmath>
 
-#include "../config.h"
-
 #include "../utils/spline/spline.h"
 #include "../utils/matplotlib/matplotlibcpp.h"
 
@@ -46,6 +44,12 @@ void Map::read(std::string map_filename) {
         center_line_dx.push_back(dx);
         center_line_dy.push_back(dy);
   	};
+    // round trip:
+    center_line_s.push_back(ROUND_TRIP_S);
+    center_line_x.push_back(center_line_x[0]);
+    center_line_y.push_back(center_line_y[0]);
+    center_line_dx.push_back(center_line_dx[0]);
+    center_line_dy.push_back(center_line_dy[0]);
 
     // parse s resolution:
     if (center_line_s.size() > 1) {
@@ -58,23 +62,10 @@ void Map::read(std::string map_filename) {
         center_line_s_resolution /= (N - 1);         
     }
 
-    // build spline smoother:
-    std::vector<double> center_line_s_round_trip(center_line_s);
-    std::vector<double> center_line_x_round_trip(center_line_x);
-    std::vector<double> center_line_y_round_trip(center_line_y);
-    std::vector<double> center_line_dx_round_trip(center_line_dx);
-    std::vector<double> center_line_dy_round_trip(center_line_dy);
-
-    center_line_s_round_trip.push_back(ROUND_TRIP_S);
-    center_line_x_round_trip.push_back(center_line_x[0]);
-    center_line_y_round_trip.push_back(center_line_y[0]);
-    center_line_dx_round_trip.push_back(center_line_dx[0]);
-    center_line_dy_round_trip.push_back(center_line_dy[0]);
-
-    center_line_x_smoothed.set_points(center_line_s_round_trip, center_line_x_round_trip);
-    center_line_y_smoothed.set_points(center_line_s_round_trip, center_line_y_round_trip);
-    center_line_dx_smoothed.set_points(center_line_s_round_trip, center_line_dx_round_trip);
-    center_line_dy_smoothed.set_points(center_line_s_round_trip, center_line_dy_round_trip);
+    center_line_x_smoothed.set_points(center_line_s, center_line_x);
+    center_line_y_smoothed.set_points(center_line_s, center_line_y);
+    center_line_dx_smoothed.set_points(center_line_s, center_line_dx);
+    center_line_dy_smoothed.set_points(center_line_s, center_line_dy);
 }
 
 /**
@@ -289,6 +280,9 @@ std::vector<double> Map::get_world_frame_position(double s, double d)
 */
 std::vector<double> Map::get_world_frame_position_smoothed(double s, double d)
 {
+    // rectify s:
+    s = fmod(s, ROUND_TRIP_S);
+
     // estimate normal vector:
     double dx = center_line_dx_smoothed(s);
     double dy = center_line_dy_smoothed(s);

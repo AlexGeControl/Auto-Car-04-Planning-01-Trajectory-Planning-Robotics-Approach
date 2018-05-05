@@ -91,6 +91,8 @@ void visualize_state(Map &map, const EgoVehicle &ego_vehicle, const Predictor::P
 int main() {
 	uWS::Hub h;
 
+	bool debug = true;
+
 	// HD map:
 	Map map;
 	map.read("../data/udacity-map-original.csv");
@@ -102,12 +104,13 @@ int main() {
 	Predictor predictor(map);
 
 	// planner:
-	double PLANNING_HORIZON = 2.4;
+	double PLANNING_HORIZON = 1.8;
 	double PLANNING_INTERVAL = 0.1;
 	Planner planner;
 
 	h.onMessage(
 			[	
+				&debug,
 				// HD map:
 				&map,
 				// ego vehicle:
@@ -166,20 +169,58 @@ int main() {
 							double end_path_d = j[1]["end_path_d"];
 
 							// Sensor Fusion Data, a list of all other cars on the same side of the road.
-							auto sensor_fusion = j[1]["sensor_fusion"];
+							vector<vector<double>> sensor_fusion = j[1]["sensor_fusion"];
 							
+							// rectify round trip behavior:
+							if (ego_vehicle.s < 211.649354934692 || ego_vehicle.s > 6520.02080917358) {
+								if (ego_vehicle.s < 211.649354934692) {
+									ego_vehicle.s += 6945.554;
+								}
+								
+								for (auto &fused_object: sensor_fusion) {
+									if (fused_object[5] < 6520.02080917358) {
+										fused_object[5] += 6945.554;
+									}
+								}
+							}
+
 							TrajectoryGenerator::Trajectory trajectory;
-							if (previous_trajectory.N * ego_vehicle.STEPSIZE < PLANNING_HORIZON - PLANNING_INTERVAL) {
-								// Object prediction:
-								auto predicted_object_list = predictor.predict(sensor_fusion, 0.0, ego_vehicle.STEPSIZE, PLANNING_HORIZON);
-								// Planning:
-								trajectory = planner.generate_trajectory(map, ego_vehicle, predicted_object_list, ego_vehicle.STEPSIZE, PLANNING_HORIZON);
-								// fallback to previous trajectory:
-								if (0 == trajectory.N) {
+							// DEBUG: round up testcase
+							if (debug) {
+								cout << "[Round Up Test]" << endl;
+
+								trajectory.N = 1;
+								
+								auto position = map.get_world_frame_position_smoothed(6782.5570526123, 6.0);
+								trajectory.x.push_back(position[0]);
+								trajectory.y.push_back(position[1]);
+								
+								position = map.get_world_frame_position_smoothed(6828.09141921997, 6.0);
+								trajectory.x.push_back(position[0]);
+								trajectory.y.push_back(position[1]);
+								
+								position = map.get_world_frame_position_smoothed(6871.54959487915, 6.0);
+								trajectory.x.push_back(position[0]);
+								trajectory.y.push_back(position[1]);
+								
+								position = map.get_world_frame_position_smoothed(6914.14925765991, 6.0);
+								trajectory.x.push_back(position[0]);
+								trajectory.y.push_back(position[1]);								
+								
+								debug = false;
+							} else {
+								if (previous_trajectory.N * ego_vehicle.STEPSIZE < PLANNING_HORIZON - PLANNING_INTERVAL) {
+									// Object prediction:
+									auto predicted_object_list = predictor.predict(ego_vehicle, sensor_fusion, 0.0, ego_vehicle.STEPSIZE, PLANNING_HORIZON);
+									// Planning:
+									trajectory = planner.generate_trajectory(map, ego_vehicle, predicted_object_list, ego_vehicle.STEPSIZE, PLANNING_HORIZON);
+									// fallback to previous trajectory:
+									if (0 == trajectory.N) {
+										trajectory = previous_trajectory;
+									}
+								} else {
 									trajectory = previous_trajectory;
 								}
-							} else {
-								trajectory = previous_trajectory;
 							}
 								
 							// Actuate:

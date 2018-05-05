@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "../map/map.h"
+#include "../vehicle/vehicle.h"
 
 class Predictor {
 public:
@@ -56,7 +57,7 @@ public:
     /**
      * generate prediction from object fusion
      */
-    PredictedObjectList predict(const FusedObjectList &fused_object_list, double t0, double stepsize, double horizon);
+    PredictedObjectList predict(const EgoVehicle &ego_vehicle, const FusedObjectList &fused_object_list, double t0, double stepsize, double horizon);
 private:
     Map &m_map;
 

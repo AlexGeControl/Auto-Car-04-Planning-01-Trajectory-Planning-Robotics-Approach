@@ -6,6 +6,7 @@
 #include "../utils/csv/csv.h"
 #include "../utils/spline/spline.h"
 #include "../utils/matplotlib/matplotlibcpp.h"
+#include "../planning/driving_strategy.h"
 
 class Map {
 public:
@@ -36,8 +37,9 @@ public:
     } Lane;
 
     const double LANE_WIDTH = 4.0;
-    const double SPEED_LIMIT_LOWER_MPS = 40.0 * 0.44704;
-    const double SPEED_LIMIT_UPPER_MPS = 47.0 * 0.44704;
+    const double ROUND_TRIP_S = 6945.554;
+    const double SPEED_LIMIT_LOWER_MPS = DrivingStrategy::MIN_VELOCITY;
+    const double SPEED_LIMIT_UPPER_MPS = DrivingStrategy::MAX_VELOCITY;
 
     enum LANE_ID {
         RIGHT_1 = +1,

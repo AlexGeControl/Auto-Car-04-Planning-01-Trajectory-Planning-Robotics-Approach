@@ -86,15 +86,15 @@ namespace DrivingStrategy {
     double Highway::get_flexibility_cost(const TrajectoryGenerator::TrajectoryReference &end, const LaneFeasibleZone &zone) {
         // lane selection cost:
         double ratio_flexibility = ((end.d == 6.0) ? +1.0 : -1.0);
-        double cost_flexibility = 0.6 * logistic(ratio_flexibility);
+        double cost_flexibility = logistic(ratio_flexibility);
         // available space cost:
         double ratio_space = (zone.s_leading_min - zone.s_following_max) / (zone.s_upper - zone.s_lower);
-        double cost_space = 2.0 * logistic(ratio_space);
+        double cost_space = logistic(ratio_space);
         // leading vehicle cost:
         double ratio_leading = (zone.is_with_leading_vehicle ? -3.0 : +3.0);
-        double cost_leading = 2.0 * logistic(ratio_leading);
+        double cost_leading = 3.0 * logistic(ratio_leading);
         // following vehicle cost:
-        double ratio_following = (zone.is_with_following_vehicle ? -0.25 : +0.25);
+        double ratio_following = (zone.is_with_following_vehicle ? -1.0 : +1.0);
         double cost_following = logistic(ratio_following);
 
         /*
@@ -122,6 +122,9 @@ namespace DrivingStrategy {
         // vs covered:
         double ratio_vs_reached = (end.vs - zone.vs_lower) / (zone.vs_upper - zone.vs_lower);
         double cost_vs_reached = logistic(ratio_vs_reached);
+        // max speed reached:
+        double ratio_vs_max_speed = 2.0 * (end.vs - 40.0 * 0.44704) / (10.0 * 0.44704);
+        double cost_vs_max_speed = logistic(ratio_vs_max_speed);
         // lane change cost:
         // double ratio_delta_d = -std::fabs(start.d - end.d) / 4.0 + 0.5;
         // double cost_delta_d = logistic(ratio_delta_d);
@@ -133,7 +136,7 @@ namespace DrivingStrategy {
         std::cout << "\t[delta d]: " << cost_delta_d << std::endl;
         */
 
-        double cost = cost_s_reached + cost_vs_reached;
+        double cost = cost_s_reached + cost_vs_reached + cost_vs_max_speed;
 
         return cost;
     }
