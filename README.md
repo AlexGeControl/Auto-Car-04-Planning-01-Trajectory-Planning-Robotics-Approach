@@ -58,7 +58,9 @@ You can download the simulator for testing highway scenario from [releases tab (
 3. Compile: `cmake .. && make`
 4. Run it: `./path_planning`.
 
-## Data Cookbook
+---
+
+## System Cookbook
 
 ### 1. Map
 
@@ -105,7 +107,9 @@ You can download the simulator for testing highway scenario from [releases tab (
         * car's s position in frenet coordinates
         * car's d position in frenet coordinates. 
 
-## Details
+---
+
+## System Details
 
 1. The car uses a perfect controller and will visit every (x,y) point it recieves in the list every .02 seconds. The units for the (x,y) points are in meters and the spacing of the points determines the speed of the car. The vector going from a point to the next point in the list dictates the angle of the car. Acceleration both in the tangential and normal directions is measured along with the jerk, the rate of change of total Acceleration. The (x,y) point paths that the planner recieves should not have a total acceleration that goes over 10 m/s^2, also the jerk should not go over 50 m/s^3. (NOTE: As this is BETA, these requirements might change. Also currently jerk is over a .02 second interval, it would probably be better to average total acceleration over 1 second and measure jerk from that.
 
