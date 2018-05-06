@@ -7,7 +7,7 @@ namespace DrivingStrategy {
     /**
      * dimensions
      */
-    const double VEHICLE_LENGTH = 4.0;
+    const double VEHICLE_LENGTH = 6.0;
     /**
      * dynamics
      */
