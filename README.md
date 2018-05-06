@@ -117,3 +117,108 @@ You can download the simulator for testing highway scenario from [releases tab (
 
 ---
 
+## Solution Overview
+
+### Architecture
+
+<img src="doc/architecture-overview.jpg" width="100%" alt="Architecture Overview" />
+
+Current solution architecture is organized as follows:
+
+    * High-Definition Map: Provide map info of driving scenario
+    * Localization: Provide ego vehicle's localization and odometry
+    * Prediction: Predict surrouding objects' short-term motion
+    * Path Planner: Generate feasible & optimal trajectory for ego vehicle's next step motion
+    * Driving Strategy: Evaluate next step motion's feasibility and optimality
+    * Trajectory Generator: Generate trajectory for next step motion
+    * Actuator: Interface to simulator
+
+### High-Definition Map
+
+<a href="src/map">High-Definition Map</a> is a class as both map reader, writer and center line smoother.
+
+* Map Reader & Writer
+    * Use <a href="src/utils/csv">CSV library</a> for convenient map loading.
+    * Save the processed map(e.g, the one attained through resolution improvement) as CSV.
+
+* Center Line Smoother
+    * Use <a href="src/utils/spline">spline library</a> to generate smooth center line between original map waypoints
+
+### Localization
+
+<a href="src/vehicle">Localization</a> is a convenient wrapper for ego vehicle's state and odometry.
+
+* Ego Vehicle State
+    * Convenient access to ego vehicle's world frame & frenet frame position, heading and speed
+
+* Odometry
+    * Access to previous planned trajectory.
+    * Estimate next actuation time for next step motion planning.
+
+* Start Configuration Estimation
+    * Estimate start configuration for next step motion planning.
+
+### Prediction
+
+<a href="src/prediction">Prediction</a> predicts surrounding objects's short-term motion.
+
+* Maneuvers Implemented
+    * Follow Lane: Surrounding objects would follow current lane at current speed for the whole horizon.
+    * Drive Freespace: Surrounding objects would keep current speed and heading and drive as if in freespace, ignore lane totally.
+
+### Path Planner
+
+<a href="src/planning/planner.cpp">Path Planner</a> generates both feasible and optimal trajectory for ego vehicle's next step motion. It follows the methodology proposed in this paper <a href="https://pdfs.semanticscholar.org/0e4c/282471fda509e8ec3edd555e32759fedf4d7.pdf">Optimal Trajectory Generation for Dynamic Street Scenarios in a Frenet Frame</a>
+
+* Feasible Zone Generator
+    * Generate feasible zone, end configuration space in adjacent alnes, using ego vehicle's current state and surrouding object prediction.
+
+* Trajectory Generation and Evaluation
+    * Given feasible zone, propose end configurations.
+    * Solve jerk minimized trajectory using selected start & end configuration.
+    * Evaluate the feasibility and optimality of proposed trajectory.
+
+### Driving Strategy
+
+<a href="src/planning/driving_strategy.cpp">Driving Strategy</a> evaluates the feasibility and optimality of proposed trajectory
+
+* Feasibility--Satisfy Max Speed, Acceleration and Jerk
+    * Check for Parametric Trajectory
+        * Given the parametric form of proposed trajectory(coefficients of the quintic polynomial), evaluate its 1st, 2nd and 3rd order derivatives at each future timestamp at the interval of 0.02 seconds.
+    * Check for Numerical Trajectory
+        * Given the proposed trajectory in C++ vector format, evaluate its 1st, 2nd and 3rd order numerical derivatives using second order forward difference formula at each evaluatable timestamp.
+
+* Optimality--Evaluate from Efficiency, Flexibility and Safety
+    * Efficiency
+        * Feasible distance covered
+        * Feasible speed reached
+        * Lane change cost
+    * Flexibity
+        * Is leading or following vehicle presents
+        * Available are in lane
+        * Possbile future maneuvers of selected lane
+    * Safety
+        * Safety distance needed for emergency case handling.
+
+### Trajectory Generator
+
+<a href="src/planning/trajectory_generator.cpp">Trajectory Generator</a> propose trajectory for next step motion and optimize final trajectory through spline smoothing of previous and newly generated trajectory.
+
+* Trajectory Proposal
+    * Solve the coefficients of the quintic polynomial for both S and D trajectory using the method in courseware
+
+* Trajectory Optimization
+    * Smooth the final trajectory using previously executed waypoints and newly generated waypoints through spline smoothing
+
+---
+
+## Next Step Plan
+
+### Fine Tune Cost Functions in Driving Strategy Module
+
+Current cost function only has a very high probability of completing the round trip with no incidents. It would still cause incidents in dense traffic situations. Fine tuning is still needed to guarantee its performance.
+
+### Evaluate New Methods for Planning
+
+Bring ideas from Robotics Software Engineer Term 2 such as deep reinforcement learning based approaches to better solve this planning problem.
+
