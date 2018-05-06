@@ -210,7 +210,7 @@ std::map<int, DrivingStrategy::Highway::LaneFeasibleZone> Planner::get_lane_feas
                 // object behind ego:
                 if (object_lane.id != ego_lane.id) {
                     if (vs1 > lane_feasible_zone.vs_lower) {
-                        double safety_distance = DrivingStrategy::Highway::get_safety_distance(vs1 - lane_feasible_zone.vs_lower);
+                        double safety_distance = 1.5 * DrivingStrategy::Highway::get_safety_distance(vs1 - lane_feasible_zone.vs_lower);
                         double s_lower_proposed = s1 + safety_distance;
                         if (s_lower_proposed > lane_feasible_zone.s_lower) {
                             lane_feasible_zone.is_with_following_vehicle = true;
@@ -278,8 +278,8 @@ std::vector<TrajectoryGenerator::TrajectoryReference> Planner::generate_end_conf
     std::vector<TrajectoryGenerator::TrajectoryReference> result;
 
     // for (double delta_horizon = -0.10 * horizon; delta_horizon < +0.20 * horizon; delta_horizon += 0.10 * horizon) {
-    for (double s_factor = 0.20; s_factor <= 0.80; s_factor += 0.10) {
-        for (double vs_factor = 0.10; vs_factor <= 0.80; vs_factor += 0.10) {
+    for (double s_factor = 0.10; s_factor <= 0.90; s_factor += 0.10) {
+        for (double vs_factor = 0.10; vs_factor <= 0.90; vs_factor += 0.10) {
             // init:
             TrajectoryGenerator::TrajectoryReference end{
                 // horizon:
@@ -325,8 +325,6 @@ TrajectoryGenerator::Trajectory Planner::get_optimized_trajectory(
     
     tk::spline x_smoothed, y_smoothed;
 
-    std::cout << "[Optimized Trajectory]: " << std::endl;
-
     // previous trajectory
     double t0 = ego_vehicle.get_time();
     if (t0 > 0.0) {
@@ -345,7 +343,6 @@ TrajectoryGenerator::Trajectory Planner::get_optimized_trajectory(
             y_output.push_back(y);
         }
     }
-    std::cout << "\t[Previous]: " << t_input.size() << std::endl;
 
     // newly generated trajectory:
     for (double t = 0.5*stepsize; t < newly_generated_trajectory_params.T; t += stepsize) {
@@ -362,8 +359,6 @@ TrajectoryGenerator::Trajectory Planner::get_optimized_trajectory(
         y_output.push_back(y);
     }
 
-    std::cout << "\t[Newly Generated]: " << t_input.size() << std::endl;
-
     x_smoothed.set_points(t_input, x_output);
     y_smoothed.set_points(t_input, y_output);
 
@@ -376,7 +371,5 @@ TrajectoryGenerator::Trajectory Planner::get_optimized_trajectory(
         trajectory.y.push_back(y);                
     }
     
-    std::cout << "[DONE]" << std::endl << std::endl;
-
     return trajectory;    
 }

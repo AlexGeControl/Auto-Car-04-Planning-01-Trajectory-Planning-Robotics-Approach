@@ -91,7 +91,7 @@ void visualize_state(Map &map, const EgoVehicle &ego_vehicle, const Predictor::P
 int main() {
 	uWS::Hub h;
 
-	bool debug = true;
+	bool debug = false;
 
 	// HD map:
 	Map map;
@@ -104,8 +104,8 @@ int main() {
 	Predictor predictor(map);
 
 	// planner:
-	double PLANNING_HORIZON = 2.0;
-	double PLANNING_INTERVAL = 0.1;
+	double PLANNING_HORIZON = 1.80;
+	double PLANNING_INTERVAL = 0.09;
 	Planner planner;
 
 	h.onMessage(

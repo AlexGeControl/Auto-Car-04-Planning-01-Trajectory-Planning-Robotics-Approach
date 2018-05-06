@@ -11,8 +11,8 @@ namespace DrivingStrategy {
     /**
      * dynamics
      */
+    const double MIN_VELOCITY = 40.0 * 0.44704;
     const double MAX_VELOCITY = 49.0 * 0.44704;
-    const double MIN_VELOCITY = 49.0 * 0.44704;
     const double VELOCITY_DEVIATION = 10.0 * 0.44704;
     const double MAX_ACCELERATION = 10.0;
     const double MAX_JERK = 10.0;
