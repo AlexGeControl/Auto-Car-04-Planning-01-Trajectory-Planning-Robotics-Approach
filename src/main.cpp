@@ -104,7 +104,7 @@ int main() {
 	Predictor predictor(map);
 
 	// planner:
-	double PLANNING_HORIZON = 1.8;
+	double PLANNING_HORIZON = 2.0;
 	double PLANNING_INTERVAL = 0.1;
 	Planner planner;
 
