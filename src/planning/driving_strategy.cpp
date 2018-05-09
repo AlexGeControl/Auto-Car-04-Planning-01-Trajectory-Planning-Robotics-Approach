@@ -13,7 +13,7 @@ namespace DrivingStrategy {
         @return selected safety distance
     */
     double Highway::get_safety_distance(double velocity) {
-        return VEHICLE_LENGTH + (velocity * RESPONSE_TIME + 0.5 * std::pow(velocity, 2.0) / MAX_ACCELERATION);
+        return 3.0 * VEHICLE_LENGTH + (velocity * RESPONSE_TIME + 0.5 * std::pow(velocity, 2.0) / MAX_ACCELERATION);
     }
 
     /**

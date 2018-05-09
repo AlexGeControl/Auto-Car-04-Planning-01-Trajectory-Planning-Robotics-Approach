@@ -131,9 +131,9 @@ private:
      * lane
      */
     std::map<int, Lane> LANE = {
-        {RIGHT_1, {RIGHT_1, + 0.0, + 4.0, + 2.0, SPEED_LIMIT_LOWER_MPS, SPEED_LIMIT_UPPER_MPS}},
+        {RIGHT_1, {RIGHT_1, + 0.0, + 4.0, + 2.5, SPEED_LIMIT_LOWER_MPS, SPEED_LIMIT_UPPER_MPS}},
         {RIGHT_2, {RIGHT_2, + 4.0, + 8.0, + 6.0, SPEED_LIMIT_LOWER_MPS, SPEED_LIMIT_UPPER_MPS}},
-        {RIGHT_3, {RIGHT_3, + 8.0, +12.0, +10.0, SPEED_LIMIT_LOWER_MPS, SPEED_LIMIT_UPPER_MPS}}
+        {RIGHT_3, {RIGHT_3, + 8.0, +12.0, + 9.5, SPEED_LIMIT_LOWER_MPS, SPEED_LIMIT_UPPER_MPS}}
     };
 
     std::map<int, std::vector<MANEUVER>> VALID_MANEUVERS = {

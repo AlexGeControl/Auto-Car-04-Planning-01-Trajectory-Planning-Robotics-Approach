@@ -278,8 +278,8 @@ std::vector<TrajectoryGenerator::TrajectoryReference> Planner::generate_end_conf
     std::vector<TrajectoryGenerator::TrajectoryReference> result;
 
     // for (double delta_horizon = -0.10 * horizon; delta_horizon < +0.20 * horizon; delta_horizon += 0.10 * horizon) {
-    for (double s_factor = 0.10; s_factor <= 0.90; s_factor += 0.10) {
-        for (double vs_factor = 0.10; vs_factor <= 0.90; vs_factor += 0.10) {
+    for (double s_factor = 0.00; s_factor <= 1.00; s_factor += 0.10) {
+        for (double vs_factor = 0.00; vs_factor <= 1.00; vs_factor += 0.10) {
             // init:
             TrajectoryGenerator::TrajectoryReference end{
                 // horizon:
