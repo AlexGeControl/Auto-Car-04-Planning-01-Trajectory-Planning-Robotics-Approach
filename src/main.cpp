@@ -104,8 +104,8 @@ int main() {
 	Predictor predictor(map);
 
 	// planner:
-	double PLANNING_HORIZON = 2.00;
-	double PLANNING_INTERVAL = 0.05;
+	double PLANNING_HORIZON = 1.80;
+	double PLANNING_INTERVAL = 0.10;
 	Planner planner;
 
 	h.onMessage(

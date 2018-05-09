@@ -122,25 +122,25 @@ namespace DrivingStrategy {
         const TrajectoryGenerator::TrajectoryReference &end, const LaneFeasibleZone &zone
     ) {
         // s covered:
-        double ratio_s_reached = (end.s - zone.s_lower) / (zone.s_upper - zone.s_lower);
-        double cost_s_reached = logistic(ratio_s_reached);
+        double ratio_s_reached = 10.0 * ((end.s - zone.s_lower) / (zone.s_upper - zone.s_lower) - 0.5);
+        double cost_s_reached = 2.0 * logistic(ratio_s_reached);
         // vs covered:
-        double ratio_vs_reached = 4.0 * (end.vs - zone.vs_lower) / (zone.vs_upper - zone.vs_lower);
-        double cost_vs_reached = logistic(ratio_vs_reached);
+        double ratio_vs_reached = 10.0 * ((end.vs - zone.vs_lower) / (zone.vs_upper - zone.vs_lower) - 0.5);
+        double cost_vs_reached = 4.0 * logistic(ratio_vs_reached);
         // max speed reached:
-        double ratio_vs_max_speed = 2.0 * (end.vs - DrivingStrategy::MAX_VELOCITY) / (2.0 * 0.44704);
-        double cost_vs_max_speed = logistic(ratio_vs_max_speed);
+        double ratio_vs_max_speed = (end.vs - DrivingStrategy::MAX_VELOCITY) / (1.0 * 0.44704);
+        double cost_vs_max_speed = 8.0 * logistic(ratio_vs_max_speed);
         // lane change cost:
-        double ratio_delta_d = ((end.d == start.d) ? +1.0 : -1.0);;
+        double ratio_delta_d = ((end.d == start.d) ? +0.5 : -0.5);;
         double cost_delta_d = logistic(ratio_delta_d);
 
         /*
         std::cout << "[Cost Efficiency]:" << std::endl;
         std::cout << "\t[ps]: " << cost_s_reached << std::endl;    
         std::cout << "\t[vs]: " << cost_vs_reached << std::endl;
+        std::cout << "\t[vmax]: " << ratio_vs_max_speed << ", " << cost_vs_max_speed << std::endl;
         std::cout << "\t[delta d]: " << cost_delta_d << std::endl;
-        */
-
+         */
         double cost = cost_s_reached + cost_vs_reached + cost_vs_max_speed;
 
         return cost;

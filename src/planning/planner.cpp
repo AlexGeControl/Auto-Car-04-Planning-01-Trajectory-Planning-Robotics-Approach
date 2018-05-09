@@ -248,11 +248,10 @@ std::map<int, DrivingStrategy::Highway::LaneFeasibleZone> Planner::get_lane_feas
             std::cout << "\t\t[Available Area]: " << lane_feasible_zone.s_leading_min << ", " << lane_feasible_zone.s_following_max << std::endl;
             std::cout << "\t\t[Planning S]: " << lane_feasible_zone.s_upper << ", " << lane_feasible_zone.s_lower << std::endl;
             std::cout << "\t\t[Planning VS]: " << lane_feasible_zone.vs_upper << ", " << lane_feasible_zone.vs_lower << std::endl;
-  
+             */
             if (lane_feasible_zone.s_lower > lane_feasible_zone.s_upper || lane_feasible_zone.vs_lower > lane_feasible_zone.vs_upper) {
                 lane_feasible_zones.erase(it);
             }
-            */
         }
     }
     // std::cout << "[Available Zones]: " << lane_feasible_zones.size() << std::endl;
