@@ -122,10 +122,10 @@ namespace DrivingStrategy {
         const TrajectoryGenerator::TrajectoryReference &end, const LaneFeasibleZone &zone
     ) {
         // s covered:
-        double ratio_s_reached = 10.0 * ((end.s - zone.s_lower) / (zone.s_upper - zone.s_lower) - 0.5);
+        double ratio_s_reached = 10.0 * ((end.s - zone.s_lower) / (zone.s_upper - zone.s_lower));
         double cost_s_reached = 2.0 * logistic(ratio_s_reached);
         // vs covered:
-        double ratio_vs_reached = 10.0 * ((end.vs - zone.vs_lower) / (zone.vs_upper - zone.vs_lower) - 0.5);
+        double ratio_vs_reached = 10.0 * ((end.vs - zone.vs_lower) / (zone.vs_upper - zone.vs_lower));
         double cost_vs_reached = 4.0 * logistic(ratio_vs_reached);
         // max speed reached:
         double ratio_vs_max_speed = (end.vs - DrivingStrategy::MAX_VELOCITY) / (1.0 * 0.44704);
