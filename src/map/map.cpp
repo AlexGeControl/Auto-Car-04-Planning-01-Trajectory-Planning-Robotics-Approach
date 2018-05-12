@@ -385,7 +385,7 @@ const Map::Lane& Map::get_next_lane(const Map::Lane &current_lane, Map::MANEUVER
 
 /**
     visualize HD map.
-*/
+
 void Map::show(const ObjectList &object_list) {
     std::cout << "[Map Resolution]: " << std::dec << center_line_s_resolution << std::endl;
     
@@ -399,6 +399,7 @@ void Map::show(const ObjectList &object_list) {
 
     plt::show("Path Planning");
 }
+*/
 
 /**
     analyze HD map precision.

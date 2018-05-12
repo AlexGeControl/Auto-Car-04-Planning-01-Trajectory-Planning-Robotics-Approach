@@ -5,7 +5,7 @@
 #include <map>
 #include "../utils/csv/csv.h"
 #include "../utils/spline/spline.h"
-#include "../utils/matplotlib/matplotlibcpp.h"
+// #include "../utils/matplotlib/matplotlibcpp.h"
 #include "../planning/driving_strategy.h"
 
 class Map {
@@ -101,7 +101,7 @@ public:
     /**
      * debug
      */
-    void show(const ObjectList &Object_list);
+    // void show(const ObjectList &Object_list);
     void evaluate_precision();
 private:
     /**

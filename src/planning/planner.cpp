@@ -1,5 +1,6 @@
 #include "planner.h"
 
+#include <iostream>
 #include <iomanip>
 #include <map>
 #include <cmath>
@@ -278,7 +279,7 @@ std::vector<TrajectoryGenerator::TrajectoryReference> Planner::generate_end_conf
 
     // for (double delta_horizon = -0.10 * horizon; delta_horizon < +0.20 * horizon; delta_horizon += 0.10 * horizon) {
     for (double s_factor = 0.00; s_factor <= 1.00; s_factor += 0.10) {
-        for (double vs_factor = 0.00; vs_factor <= 1.00; vs_factor += 0.10) {
+        for (double vs_factor = 0.00; vs_factor <= 1.00; vs_factor += 0.08) {
             // init:
             TrajectoryGenerator::TrajectoryReference end{
                 // horizon:

@@ -85,7 +85,7 @@ void visualize_state(Map &map, const EgoVehicle &ego_vehicle, const Predictor::P
 		object_list.push_back(object);
 	}
 
-	map.show(object_list);
+	// map.show(object_list);
 }
 
 int main() {
