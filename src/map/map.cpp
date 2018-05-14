@@ -1,15 +1,16 @@
 
 
+#include <iostream>
 #include <fstream>
 #include <cmath>
 
 #include "../utils/spline/spline.h"
-#include "../utils/matplotlib/matplotlibcpp.h"
+//#include "../utils/matplotlib/matplotlibcpp.h"
 
 #include "map.h"
 
 namespace csv = io;
-namespace plt = matplotlibcpp;
+// namespace plt = matplotlibcpp;
 
 /**
     map constructor.

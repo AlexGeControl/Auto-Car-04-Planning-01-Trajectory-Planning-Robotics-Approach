@@ -8,7 +8,7 @@
 
 #include "utils/json/json.hpp"
 #include "utils/spline/spline.h"
-#include "utils/matplotlib/matplotlibcpp.h"
+//#include "utils/matplotlib/matplotlibcpp.h"
 
 #include "map/map.h"
 #include "vehicle/vehicle.h"
@@ -23,7 +23,7 @@ using namespace std;
 using json = nlohmann::json;
 
 // visualization
-namespace plt = matplotlibcpp;
+//namespace plt = matplotlibcpp;
 
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
