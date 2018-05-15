@@ -235,7 +235,7 @@ std::map<int, DrivingStrategy::Highway::LaneFeasibleZone> Planner::get_lane_feas
             }
 
             DrivingStrategy::Highway::LaneFeasibleZone &lane_feasible_zone = lane_feasible_zones[object_lane.id];
-            if (s0 < ego_vehicle.s) {
+            if (s0 < ego_vehicle.s + DrivingStrategy::VEHICLE_LENGTH) {
                 lane_feasible_zone.s_following_max = std::max(lane_feasible_zone.s_following_max, s1);
                 // object behind ego:
                 if (object_lane.id != ego_lane.id) {
@@ -255,7 +255,7 @@ std::map<int, DrivingStrategy::Highway::LaneFeasibleZone> Planner::get_lane_feas
                 lane_feasible_zone.s_leading_min = std::min(lane_feasible_zone.s_leading_min, s1);
 
                 if (s1 < lane_feasible_zone.s_upper) {
-                    double safety_distance = DrivingStrategy::Highway::get_safety_distance(vs1 - ego_trajectory_reference.vs);
+                    double safety_distance = 4.0 * DrivingStrategy::Highway::get_safety_distance(vs1 - ego_trajectory_reference.vs);
                     double s_lower_proposed = s1 + safety_distance;
                     if (s_lower_proposed > lane_feasible_zone.s_lower) {
                         lane_feasible_zone.is_with_following_vehicle = true;
