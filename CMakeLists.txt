@@ -24,6 +24,6 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 add_executable(path_planning ${sources})
 
-target_include_directories(path_planning PRIVATE "/usr/include/python2.7")
-target_link_libraries(path_planning pthread z ssl uv uWS python2.7)
+target_include_directories(path_planning PRIVATE)
+target_link_libraries(path_planning pthread z ssl uv uWS)
 

@@ -60,6 +60,21 @@ private:
         const TrajectoryGenerator::TrajectoryParams &newly_generated_trajectory_params,
         double stepsize
     );
+
+    /**
+     * target trajectory
+     */
+    typedef struct {
+        int lane;
+        double cost;
+        TrajectoryGenerator::TrajectoryParams params;
+    } TargetTrajectory;
+
+    const int DECISION_THRESHOLD = 4;
+    struct {
+        int lane;
+        int count;
+    } decision;
 };
 
 #endif /* PLANNER_H */

@@ -1,6 +1,7 @@
 #include "vehicle.h"
 #include <iostream>
 #include <cmath>
+#include "../map/map.h"
 
 /**
  * constructor

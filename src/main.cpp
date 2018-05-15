@@ -104,8 +104,8 @@ int main() {
 	Predictor predictor(map);
 
 	// planner:
-	double PLANNING_HORIZON = 1.80;
-	double PLANNING_INTERVAL = 0.10;
+	double PLANNING_HORIZON = 2.00;
+	double PLANNING_INTERVAL = 0.06;
 	Planner planner;
 
 	h.onMessage(
@@ -165,8 +165,8 @@ int main() {
 							ego_vehicle.sync_time(previous_trajectory);
 
 							// Previous path's end s and d values 
-							double end_path_s = j[1]["end_path_s"];
-							double end_path_d = j[1]["end_path_d"];
+							ego_vehicle.target_s = j[1]["end_path_s"];
+							ego_vehicle.target_d = j[1]["end_path_d"];
 
 							// Sensor Fusion Data, a list of all other cars on the same side of the road.
 							vector<vector<double>> sensor_fusion = j[1]["sensor_fusion"];
@@ -209,7 +209,7 @@ int main() {
 								
 								debug = false;
 							} else {
-								if (previous_trajectory.N * ego_vehicle.STEPSIZE < PLANNING_HORIZON - PLANNING_INTERVAL) {
+								if (previous_trajectory.N * ego_vehicle.STEPSIZE <= PLANNING_HORIZON - PLANNING_INTERVAL) {
 									// Object prediction:
 									auto predicted_object_list = predictor.predict(ego_vehicle, sensor_fusion, 0.0, ego_vehicle.STEPSIZE, PLANNING_HORIZON);
 									// Planning:

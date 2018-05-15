@@ -13,7 +13,7 @@ namespace DrivingStrategy {
         @return selected safety distance
     */
     double Highway::get_safety_distance(double velocity) {
-        return 3.0 * VEHICLE_LENGTH + (velocity * RESPONSE_TIME + 0.5 * std::pow(velocity, 2.0) / MAX_ACCELERATION);
+        return 1.0 * VEHICLE_LENGTH + (velocity * RESPONSE_TIME + 0.5 * std::pow(velocity, 2.0) / MAX_ACCELERATION);
     }
 
     /**
@@ -102,12 +102,10 @@ namespace DrivingStrategy {
         double ratio_following = (zone.is_with_following_vehicle ? -2.0 : +2.0);
         double cost_following = logistic(ratio_following);
 
-        /*
         std::cout << "[Cost Flexibility]:" << std::endl;
         std::cout << "\t[flexibility]: " << cost_flexibility << std::endl;    
         std::cout << "\t[leading]: " << cost_leading << std::endl;
         std::cout << "\t[following]: " << cost_following << std::endl;
-        */
 
         double cost = cost_flexibility + cost_space + cost_leading + cost_following;
 
@@ -122,10 +120,10 @@ namespace DrivingStrategy {
         const TrajectoryGenerator::TrajectoryReference &end, const LaneFeasibleZone &zone
     ) {
         // s covered:
-        double ratio_s_reached = 10.0 * ((end.s - zone.s_lower) / (zone.s_upper - zone.s_lower));
+        double ratio_s_reached = ((end.s - zone.s_upper) / (zone.s_upper - zone.s_lower)) + 0.5;
         double cost_s_reached = 2.0 * logistic(ratio_s_reached);
         // vs covered:
-        double ratio_vs_reached = 10.0 * ((end.vs - zone.vs_lower) / (zone.vs_upper - zone.vs_lower));
+        double ratio_vs_reached = ((end.vs - zone.vs_upper) / (zone.vs_upper - zone.vs_lower)) + 0.5;
         double cost_vs_reached = 4.0 * logistic(ratio_vs_reached);
         // max speed reached:
         double ratio_vs_max_speed = (end.vs - DrivingStrategy::MAX_VELOCITY) / (1.0 * 0.44704);
@@ -134,13 +132,12 @@ namespace DrivingStrategy {
         double ratio_delta_d = ((end.d == start.d) ? +0.5 : -0.5);;
         double cost_delta_d = logistic(ratio_delta_d);
 
-        /*
         std::cout << "[Cost Efficiency]:" << std::endl;
-        std::cout << "\t[ps]: " << cost_s_reached << std::endl;    
-        std::cout << "\t[vs]: " << cost_vs_reached << std::endl;
-        std::cout << "\t[vmax]: " << ratio_vs_max_speed << ", " << cost_vs_max_speed << std::endl;
+        std::cout << "\t[ps]: " << cost_s_reached << ", " << ratio_s_reached << "(" << end.s << "--" << zone.s_lower << "__" << zone.s_upper << std::endl;    
+        std::cout << "\t[vs]: " << cost_vs_reached << ", " << ratio_vs_reached << "(" << end.vs << "--" << zone.vs_lower << "__" << zone.vs_upper << std::endl; 
+        std::cout << "\t[vmax]: " << cost_vs_max_speed << ", " << ratio_vs_max_speed << std::endl;
         std::cout << "\t[delta d]: " << cost_delta_d << std::endl;
-         */
+
         double cost = cost_s_reached + cost_vs_reached + cost_vs_max_speed;
 
         return cost;

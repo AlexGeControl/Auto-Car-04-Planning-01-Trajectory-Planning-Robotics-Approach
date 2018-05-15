@@ -24,6 +24,12 @@ public:
     double speed;
 
     /**
+     * target position
+     */
+    double target_s;
+    double target_d;
+
+    /**
      * constructor
      */
     EgoVehicle();
@@ -54,14 +60,14 @@ public:
     TrajectoryGenerator::TrajectoryReference get_trajectory_reference();
 
     /**
-     * set ego vehicle trajectory
-     */
-    void set_trajectory(const TrajectoryGenerator::TrajectoryParams &trajectory_params);
-
-    /**
      * get ego vehicle trajector
      */
     const TrajectoryGenerator::TrajectoryParams &get_trajectory() { return trajectory_params; } 
+
+    /**
+     * set ego vehicle trajectory
+     */
+    void set_trajectory(const TrajectoryGenerator::TrajectoryParams &trajectory_params);
 private:
     /**
      * parameterized ego vehicle trajectory
