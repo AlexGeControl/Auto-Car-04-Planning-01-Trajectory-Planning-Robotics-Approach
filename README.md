@@ -244,3 +244,14 @@ Current cost function only has a very high probability of completing the round t
 
 Current cost function is based on human heuristics and manual fine tuning of hyper-parameters. This is an extremely painful job. Next step plan would be bring ideas from Robotics Software Engineer Term 2 such as deep reinforcement learning based approaches to better solve this planning problem.
 
+---
+
+## Further Readings
+
+<a href="https://robotics.stackexchange.com/questions/8302/what-is-the-difference-between-path-planning-and-motion-planning">1. What is the Difference between Path Planning and Motion Planning</a>
+
+<a href="http://correll.cs.colorado.edu/?p=965">2.a Introduction to Path Planning</a>
+
+<a href="http://ais.informatik.uni-freiburg.de/teaching/ss10/robotics/slides/16-pathplanning.pdf">2.b Path Planning and Collision Avoidance</a>
+
+<a href="http://ais.informatik.uni-freiburg.de/teaching/ss11/robotics/slides/18-robot-motion-planning.pdf">3.a Robot Motion Planning</a>
