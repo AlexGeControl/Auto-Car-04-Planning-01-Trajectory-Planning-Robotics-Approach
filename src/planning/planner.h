@@ -66,13 +66,16 @@ private:
      */
     typedef struct {
         int lane;
-        double cost;
+        double total_cost;
+        DrivingStrategy::Highway::FlexibilityCost flexibility_cost;
+        DrivingStrategy::Highway::EfficiencyCost efficiency_cost;
         TrajectoryGenerator::TrajectoryParams params;
     } TargetTrajectory;
 
-    const int DECISION_THRESHOLD = 4;
+    const int DECISION_THRESHOLD = 3;
     struct {
-        int lane;
+        int optimal_lane;
+        int proposed_lane;
         int count;
     } decision;
 };

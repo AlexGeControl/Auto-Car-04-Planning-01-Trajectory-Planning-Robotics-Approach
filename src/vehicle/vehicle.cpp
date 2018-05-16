@@ -35,7 +35,7 @@ bool EgoVehicle::is_starting() {
  * @param trajectory Previous trajectory
  */
 void EgoVehicle::sync_time(const TrajectoryGenerator::Trajectory &previous_trajectory) {
-    t = trajectory_params.T - STEPSIZE * previous_trajectory.N;
+    t = trajectory_params.T - STEPSIZE * (previous_trajectory.N - ACTUATION_DELAY);
 }
 
 /**

@@ -25,6 +25,28 @@ The detailed definition of incidents are as below:
 
 ---
 
+## Performance Evaluation
+
+### 1. The Car is Able to Keep Lane
+
+<img src="doc/lane-keeping-01.png" width="100%" alt="Lane Keeping Demo 01" />
+
+<img src="doc/lane-keeping-02.png" width="100%" alt="Lane Keeping Demo 02" />
+
+### 2. The Car is Able to Change Lane
+
+<img src="doc/lane-change-01.png" width="100%" alt="Lane Change Demo 01" />
+
+<img src="doc/lane-change-02.png" width="100%" alt="Lane Change Demo 02" />
+
+### 3. The Car is Able to Follow Leading Vehicle Without Collision
+
+<img src="doc/leading-vehicle-following-01.png" width="100%" alt="Leading Vehicle Following Demo 01" />
+
+<img src="doc/leading-vehicle-following-02.png" width="100%" alt="Leading Vehicle Following Demo 02" />
+
+---
+
 ## Environment Setup
 
 ### 0. Dependencies
@@ -216,9 +238,9 @@ Current solution architecture is organized as follows:
 
 ### Fine Tune Cost Functions in Driving Strategy Module
 
-Current cost function only has a very high probability of completing the round trip with no incidents. It would still cause incidents in dense traffic situations. Fine tuning is still needed to guarantee its performance.
+Current cost function only has a very high probability of completing the round trip with no incidents. It has a high probability to cause incidents in dense traffic situations due to frequent failure of trajectory planning. Fine tuning is still needed to guarantee its performance.
 
 ### Evaluate New Methods for Planning
 
-Bring ideas from Robotics Software Engineer Term 2 such as deep reinforcement learning based approaches to better solve this planning problem.
+Current cost function is based on human heuristics and manual fine tuning of hyper-parameters. This is an extremely painful job. Next step plan would be bring ideas from Robotics Software Engineer Term 2 such as deep reinforcement learning based approaches to better solve this planning problem.
 

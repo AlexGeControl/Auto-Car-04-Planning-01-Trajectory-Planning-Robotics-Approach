@@ -12,7 +12,7 @@ public:
      * actuation delay
      */
     double STEPSIZE = 0.02;
-
+    const int ACTUATION_DELAY = 1;
     /**
      * vehicle pose
      */

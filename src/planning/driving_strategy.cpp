@@ -13,7 +13,7 @@ namespace DrivingStrategy {
         @return selected safety distance
     */
     double Highway::get_safety_distance(double velocity) {
-        return 1.0 * VEHICLE_LENGTH + (velocity * RESPONSE_TIME + 0.5 * std::pow(velocity, 2.0) / MAX_ACCELERATION);
+        return 2.0 * VEHICLE_LENGTH + (velocity * RESPONSE_TIME + 0.5 * std::pow(velocity, 2.0) / MAX_ACCELERATION);
     }
 
     /**
@@ -83,10 +83,20 @@ namespace DrivingStrategy {
     /**
         calculate flexibity cost
     */
-    double Highway::get_flexibility_cost(const TrajectoryGenerator::TrajectoryReference &end, const LaneFeasibleZone &zone) {
+    Highway::FlexibilityCost Highway::get_flexibility_cost(const TrajectoryGenerator::TrajectoryReference &end, const LaneFeasibleZone &zone) {
+        // init:
+        FlexibilityCost cost{
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+
+            0.0
+        };
+
         // lane selection cost:
-        double ratio_flexibility = ((end.d == 6.0) ? +2.0 : -2.0);
-        double cost_flexibility = logistic(ratio_flexibility);
+        double ratio_flexibility = ((end.d == 6.0) ? +1.0 : -1.0);
+        cost.flexibility = logistic(ratio_flexibility);
         // available space cost:
         double ratio_space = (zone.s_leading_min - zone.s_following_max) / (zone.s_upper - zone.s_lower);
         if (ratio_space > 1.0) {
@@ -94,20 +104,15 @@ namespace DrivingStrategy {
         } else {
             ratio_space = -5.0;
         }
-        double cost_space = 4.0 * logistic(ratio_space);
+        cost.space = 8.0 * logistic(ratio_space);
         // leading vehicle cost:
-        double ratio_leading = (zone.is_with_leading_vehicle ? -3.0 : +3.0);
-        double cost_leading = 2.0 * logistic(ratio_leading);
+        double ratio_leading = (zone.is_with_leading_vehicle ? -4.0 : +4.0);
+        cost.leading = 4.0 * logistic(ratio_leading);
         // following vehicle cost:
         double ratio_following = (zone.is_with_following_vehicle ? -2.0 : +2.0);
-        double cost_following = logistic(ratio_following);
+        cost.following = 2.0 * logistic(ratio_following);
 
-        std::cout << "[Cost Flexibility]:" << std::endl;
-        std::cout << "\t[flexibility]: " << cost_flexibility << std::endl;    
-        std::cout << "\t[leading]: " << cost_leading << std::endl;
-        std::cout << "\t[following]: " << cost_following << std::endl;
-
-        double cost = cost_flexibility + cost_space + cost_leading + cost_following;
+        cost.total = cost.flexibility + cost.space + cost.leading;
 
         return cost;
     }
@@ -115,30 +120,34 @@ namespace DrivingStrategy {
     /**
      *  calculate efficiency cost
      */
-    double Highway::get_efficiency_cost(
+    Highway::EfficiencyCost Highway::get_efficiency_cost(
         const TrajectoryGenerator::TrajectoryReference &start,
         const TrajectoryGenerator::TrajectoryReference &end, const LaneFeasibleZone &zone
     ) {
+        // init:
+        EfficiencyCost cost{
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+
+            0.0
+        };
+
         // s covered:
         double ratio_s_reached = ((end.s - zone.s_upper) / (zone.s_upper - zone.s_lower)) + 0.5;
-        double cost_s_reached = 2.0 * logistic(ratio_s_reached);
+        cost.s_reached = 2.0 * logistic(ratio_s_reached);
         // vs covered:
         double ratio_vs_reached = ((end.vs - zone.vs_upper) / (zone.vs_upper - zone.vs_lower)) + 0.5;
-        double cost_vs_reached = 4.0 * logistic(ratio_vs_reached);
+        cost.vs_reached = 8.0 * logistic(ratio_vs_reached);
         // max speed reached:
-        double ratio_vs_max_speed = (end.vs - DrivingStrategy::MAX_VELOCITY) / (1.0 * 0.44704);
-        double cost_vs_max_speed = 8.0 * logistic(ratio_vs_max_speed);
+        double ratio_max_speed_reached = (end.vs - DrivingStrategy::MAX_VELOCITY) / (1.0 * 0.44704);
+        cost.max_speed_reached = 4.0 * logistic(ratio_max_speed_reached);
         // lane change cost:
-        double ratio_delta_d = ((end.d == start.d) ? +0.5 : -0.5);;
-        double cost_delta_d = logistic(ratio_delta_d);
+        double ratio_delta_d = ((end.d == start.d) ? +1.0 : -1.0);;
+        cost.delta_d = 1.0 * logistic(ratio_delta_d);
 
-        std::cout << "[Cost Efficiency]:" << std::endl;
-        std::cout << "\t[ps]: " << cost_s_reached << ", " << ratio_s_reached << "(" << end.s << "--" << zone.s_lower << "__" << zone.s_upper << std::endl;    
-        std::cout << "\t[vs]: " << cost_vs_reached << ", " << ratio_vs_reached << "(" << end.vs << "--" << zone.vs_lower << "__" << zone.vs_upper << std::endl; 
-        std::cout << "\t[vmax]: " << cost_vs_max_speed << ", " << ratio_vs_max_speed << std::endl;
-        std::cout << "\t[delta d]: " << cost_delta_d << std::endl;
-
-        double cost = cost_s_reached + cost_vs_reached + cost_vs_max_speed;
+        cost.total = cost.s_reached + cost.vs_reached + cost.max_speed_reached + cost.delta_d;
 
         return cost;
     }

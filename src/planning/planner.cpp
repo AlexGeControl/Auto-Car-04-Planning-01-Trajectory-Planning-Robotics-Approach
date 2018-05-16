@@ -14,7 +14,8 @@
  * constructor
  */
 Planner::Planner() {
-    decision.lane = Map::LANE_ID::RIGHT_2;
+    decision.optimal_lane = Map::LANE_ID::RIGHT_2;
+    decision.proposed_lane = Map::LANE_ID::RIGHT_2;
     decision.count = DECISION_THRESHOLD;
 }
 
@@ -55,7 +56,7 @@ TrajectoryGenerator::Trajectory Planner::generate_trajectory(
         // init target trajectory:
         target_trajectories[intended_lane_id] = TargetTrajectory{
             intended_lane_id,
-            std::numeric_limits<double>::max(),
+            std::numeric_limits<double>::max(), {}, {},
             {0.0, {}, {}}
         };
 
@@ -73,19 +74,21 @@ TrajectoryGenerator::Trajectory Planner::generate_trajectory(
             
             // if feasible:
             if (DrivingStrategy::Highway::is_feasible_trajectory(trajectory_params, stepsize)) {
-                // a. efficiency:
-                double efficiency_cost = DrivingStrategy::Highway::get_efficiency_cost(start, end, lane_feasible_zone);
-                // b. flexibility:
-                double flexibility_cost = DrivingStrategy::Highway::get_flexibility_cost(end, lane_feasible_zone);
+                // a. flexibility:
+                auto flexibility_cost = DrivingStrategy::Highway::get_flexibility_cost(end, lane_feasible_zone);
+                // b. efficiency:
+                auto efficiency_cost = DrivingStrategy::Highway::get_efficiency_cost(start, end, lane_feasible_zone);
                 // c. safety:
 
                 // total cost:
-                double total_cost = efficiency_cost + flexibility_cost;
-                std::cout << "[Total Cost]: \n" << "\t" << total_cost << std::endl << std::endl;
+                double total_cost = efficiency_cost.total + flexibility_cost.total;
+                // std::cout << "[Total Cost]: \n" << "\t" << total_cost << std::endl << std::endl;
 
                 // whether optimal:
-                if (total_cost < target_trajectories[intended_lane_id].cost) {
-                    target_trajectories[intended_lane_id].cost = total_cost;
+                if (total_cost < target_trajectories[intended_lane_id].total_cost) {
+                    target_trajectories[intended_lane_id].total_cost = total_cost;
+                    target_trajectories[intended_lane_id].flexibility_cost = flexibility_cost;
+                    target_trajectories[intended_lane_id].efficiency_cost = efficiency_cost;
                     target_trajectories[intended_lane_id].params = trajectory_params;
                 }
             }
@@ -103,31 +106,51 @@ TrajectoryGenerator::Trajectory Planner::generate_trajectory(
         // identify optimal target trajectory:
         TargetTrajectory optimal_target_trajectory{
             0,
-            std::numeric_limits<double>::max(),
+            std::numeric_limits<double>::max(), {}, {},
             {0.0, {}, {}}            
         };
+        std::cout << "[Proposals]: " << std::endl;
         for (std::map<int, TargetTrajectory>::iterator it = target_trajectories.begin(); target_trajectories.end() != it; ++it) {
             TargetTrajectory &target_trajectory = it->second;
 
-            if (target_trajectory.cost < optimal_target_trajectory.cost) {
+            if (target_trajectory.total_cost < optimal_target_trajectory.total_cost) {
                 optimal_target_trajectory = target_trajectory;
             }
+            
+            std::cout << "\t[Lane]: " << it->first << " @ " << target_trajectory.total_cost << std::endl;
+            std::cout << "\t\t[Flexibility]: " << target_trajectory.flexibility_cost.total << std::endl;
+            std::cout << "\t\t\t[Flexibility]: " << target_trajectory.flexibility_cost.flexibility << std::endl;
+            std::cout << "\t\t\t[Space]: " << target_trajectory.flexibility_cost.space << std::endl;
+            std::cout << "\t\t\t[Leading]: " << target_trajectory.flexibility_cost.leading << std::endl;
+            std::cout << "\t\t\t[Following]: " << target_trajectory.flexibility_cost.following << std::endl;
+            std::cout << "\t\t[Efficiency]: " << target_trajectory.efficiency_cost.total << std::endl;
+            std::cout << "\t\t\t[S Reached]: " << target_trajectory.efficiency_cost.s_reached << std::endl;
+            std::cout << "\t\t\t[VS Reached]: " << target_trajectory.efficiency_cost.vs_reached << std::endl;
+            std::cout << "\t\t\t[Max Speed Reached]: " << target_trajectory.efficiency_cost.max_speed_reached << std::endl;
+            std::cout << "\t\t\t[Delta D]: " << target_trajectory.efficiency_cost.delta_d << std::endl;
         }
 
         // decision smooth:
-        if (decision.lane != optimal_target_trajectory.lane) {
-            decision.lane = optimal_target_trajectory.lane;
+        if (decision.proposed_lane != optimal_target_trajectory.lane) {
+            decision.proposed_lane = optimal_target_trajectory.lane;
             decision.count = 0;
+            std::cout << "[Proposal]: Changed" << std::endl;
         } 
-        else if (decision.count >= DECISION_THRESHOLD) {
+        else if (decision.optimal_lane != decision.proposed_lane && decision.count >= DECISION_THRESHOLD) {
+            std::cout << "[Proposal]: Finalized" << std::endl;
+            decision.optimal_lane = decision.proposed_lane;
+        }
+        ++decision.count;
+
+        if (target_trajectories.end() != target_trajectories.find(decision.optimal_lane)) {
+            // get optimal decision:
+            optimal_target_trajectory = target_trajectories[decision.optimal_lane];
+
             // generate new trajectory:
             best_trajectory = get_optimized_trajectory(map, ego_vehicle, optimal_target_trajectory.params, stepsize);
 
             // set ego vehicle trajectory:
             ego_vehicle.set_trajectory(optimal_target_trajectory.params);
-            std::cout << "[Update]" << std::endl;
-        } else {
-            ++decision.count;
         }
     }
 
@@ -156,12 +179,12 @@ std::map<int, DrivingStrategy::Highway::LaneFeasibleZone> Planner::get_lane_feas
     // current dynamics in frenet:
     TrajectoryGenerator::TrajectoryReference ego_trajectory_reference = ego_vehicle.get_trajectory_reference();
     double effective_acceleration = std::min(
-        +DrivingStrategy::MAX_ACCELERATION,
-        ego_trajectory_reference.as + 0.5 * (DrivingStrategy::MAX_JERK * horizon)
+        +0.9 * DrivingStrategy::MAX_ACCELERATION,
+        ego_trajectory_reference.as + 0.5 * (0.9 * DrivingStrategy::MAX_JERK * horizon)
     );
     double effective_deceleration = std::max(
-        -DrivingStrategy::MAX_ACCELERATION,
-        ego_trajectory_reference.as - 0.5 * (DrivingStrategy::MAX_JERK * horizon)
+        -0.9 * DrivingStrategy::MAX_ACCELERATION,
+        ego_trajectory_reference.as - 0.5 * (0.9 * DrivingStrategy::MAX_JERK * horizon)
     );
     // get valid maneuvers:
     auto feasible_maneuvers = map.get_valid_maneuvers(ego_lane);
@@ -208,6 +231,20 @@ std::map<int, DrivingStrategy::Highway::LaneFeasibleZone> Planner::get_lane_feas
 
             lane_feasible_zones[next_lane.id] = lane_feasible_zone;
         }
+        
+        /* DEBUG Feasible Zone
+        std::cout << "[Init]: " << std::endl;
+        for (std::map<int, DrivingStrategy::Highway::LaneFeasibleZone>::iterator it = lane_feasible_zones.begin(); lane_feasible_zones.end() != it; ++it) {
+            Map::LANE_ID intended_lane_id = (Map::LANE_ID) it->first;
+            DrivingStrategy::Highway::LaneFeasibleZone &lane_feasible_zone = it->second;
+
+            std::cout << "\t[Lane]: " << it->first << std::endl;
+            std::cout << "\t\t[Other Vehicle Presence]: " << lane_feasible_zone.is_with_leading_vehicle << ", " << lane_feasible_zone.is_with_following_vehicle << std::endl;
+            std::cout << "\t\t[Available Area]: " << lane_feasible_zone.s_leading_min << ", " << lane_feasible_zone.s_following_max << std::endl;
+            std::cout << "\t\t[Planning S]: " << lane_feasible_zone.s_upper << ", " << lane_feasible_zone.s_lower << std::endl;
+            std::cout << "\t\t[Planning VS]: " << lane_feasible_zone.vs_upper << ", " << lane_feasible_zone.vs_lower << std::endl;
+        }
+        */
 
         // set s lower & upper bounds according to surrounding object prediction:
         for (const auto &predicted_object: predicted_object_list) {
@@ -235,12 +272,12 @@ std::map<int, DrivingStrategy::Highway::LaneFeasibleZone> Planner::get_lane_feas
             }
 
             DrivingStrategy::Highway::LaneFeasibleZone &lane_feasible_zone = lane_feasible_zones[object_lane.id];
-            if (s0 < ego_vehicle.s + DrivingStrategy::VEHICLE_LENGTH) {
+            if (s0 < ego_vehicle.s) {
                 lane_feasible_zone.s_following_max = std::max(lane_feasible_zone.s_following_max, s1);
                 // object behind ego:
                 if (object_lane.id != ego_lane.id) {
                     if (vs1 > ego_trajectory_reference.vs) {
-                        double safety_distance = DrivingStrategy::Highway::get_safety_distance(vs1 - ego_trajectory_reference.vs);
+                        double safety_distance = DrivingStrategy::Highway::get_safety_distance(vs1 - lane_feasible_zone.vs_lower);
                         double s_lower_proposed = s1 + safety_distance;
                         if (s_lower_proposed > lane_feasible_zone.s_lower) {
                             lane_feasible_zone.is_with_following_vehicle = true;
@@ -254,36 +291,34 @@ std::map<int, DrivingStrategy::Highway::LaneFeasibleZone> Planner::get_lane_feas
             } else {
                 lane_feasible_zone.s_leading_min = std::min(lane_feasible_zone.s_leading_min, s1);
 
-                if (s1 < lane_feasible_zone.s_upper) {
-                    double safety_distance = 4.0 * DrivingStrategy::Highway::get_safety_distance(vs1 - ego_trajectory_reference.vs);
-                    double s_lower_proposed = s1 + safety_distance;
-                    if (s_lower_proposed > lane_feasible_zone.s_lower) {
-                        lane_feasible_zone.is_with_following_vehicle = true;
-                        lane_feasible_zone.s_lower = s_lower_proposed;
-                        lane_feasible_zone.vs_lower = vs1;
-                    }                    
-                } else {
-                    // object in front of ego:
-                    if (vs1 < lane_feasible_zone.vs_upper) {
-                        double safety_distance = DrivingStrategy::Highway::get_safety_distance(vs1 - lane_feasible_zone.vs_lower);
-                        double s_upper_proposed = s1 - safety_distance;
-                        if (s_upper_proposed < lane_feasible_zone.s_upper) {
-                            lane_feasible_zone.is_with_leading_vehicle = true;
-                            lane_feasible_zone.s_upper = s_upper_proposed;
-                            lane_feasible_zone.vs_upper = vs1;
-                        }
-                    } else {
-                        // too fast:
+                // object in front of ego:
+                if (vs1 < lane_feasible_zone.vs_upper) {
+                    double safety_distance = DrivingStrategy::Highway::get_safety_distance(lane_feasible_zone.vs_upper - vs1);
+                    double s_upper_proposed = s1 - safety_distance;
+                    if (s_upper_proposed < lane_feasible_zone.s_upper) {
+                        lane_feasible_zone.is_with_leading_vehicle = true;
+                        lane_feasible_zone.s_upper = s_upper_proposed;
+                        lane_feasible_zone.vs_upper = vs1;
                     }
+                } else {
+                    // too fast:
                 }
             }
         }
 
         // eliminate infeasible zones:
+        // std::cout << "[Final]: " << std::endl;
         for (std::map<int, DrivingStrategy::Highway::LaneFeasibleZone>::iterator it = lane_feasible_zones.begin(); lane_feasible_zones.end() != it; ++it) {
             Map::LANE_ID intended_lane_id = (Map::LANE_ID) it->first;
             DrivingStrategy::Highway::LaneFeasibleZone &lane_feasible_zone = it->second;
 
+            /* DEBUG Feasible Zone
+            std::cout << "\t[Lane]: " << it->first << std::endl;
+            std::cout << "\t\t[Other Vehicle Presence]: " << lane_feasible_zone.is_with_leading_vehicle << ", " << lane_feasible_zone.is_with_following_vehicle << std::endl;
+            std::cout << "\t\t[Available Area]: " << lane_feasible_zone.s_leading_min << ", " << lane_feasible_zone.s_following_max << std::endl;
+            std::cout << "\t\t[Planning S]: " << lane_feasible_zone.s_upper << ", " << lane_feasible_zone.s_lower << std::endl;
+            std::cout << "\t\t[Planning VS]: " << lane_feasible_zone.vs_upper << ", " << lane_feasible_zone.vs_lower << std::endl;
+            */
             if (lane_feasible_zone.s_lower > lane_feasible_zone.s_upper || lane_feasible_zone.vs_lower > lane_feasible_zone.vs_upper) {
                 lane_feasible_zones.erase(it);
                 continue;
@@ -293,13 +328,13 @@ std::map<int, DrivingStrategy::Highway::LaneFeasibleZone> Planner::get_lane_feas
                 lane_feasible_zone.vs_lower = ego_trajectory_reference.vs;
                 lane_feasible_zone.vs_upper = DrivingStrategy::MAX_VELOCITY;
             }
-            /* DEBUG Feasible Zone
-            std::cout << "\t[Lane]: " << it->first << std::endl;
-            std::cout << "\t\t[Other Vehicle Presence]: " << lane_feasible_zone.is_with_leading_vehicle << ", " << lane_feasible_zone.is_with_following_vehicle << std::endl;
-            std::cout << "\t\t[Available Area]: " << lane_feasible_zone.s_leading_min << ", " << lane_feasible_zone.s_following_max << std::endl;
-            std::cout << "\t\t[Planning S]: " << lane_feasible_zone.s_upper << ", " << lane_feasible_zone.s_lower << std::endl;
-            std::cout << "\t\t[Planning VS]: " << lane_feasible_zone.vs_upper << ", " << lane_feasible_zone.vs_lower << std::endl;
-            */
+
+            if (intended_lane_id != ego_lane.id) {
+                if (lane_feasible_zone.s_following_max > ego_trajectory_reference.s - DrivingStrategy::VEHICLE_LENGTH) {
+                    lane_feasible_zones.erase(it);
+                    continue;
+                }
+            }
         }
     }
 
@@ -324,8 +359,8 @@ std::vector<TrajectoryGenerator::TrajectoryReference> Planner::generate_end_conf
     std::vector<TrajectoryGenerator::TrajectoryReference> result;
 
     // for (double delta_horizon = -0.10 * horizon; delta_horizon < +0.20 * horizon; delta_horizon += 0.10 * horizon) {
-    for (double s_factor = 0.20; s_factor <= 1.00; s_factor += 0.10) {
-        for (double vs_factor = 0.20; vs_factor <= 1.00; vs_factor += 0.10) {
+    for (double s_factor = 0.10; s_factor <= 1.00; s_factor += 0.10) {
+        for (double vs_factor = 0.10; vs_factor <= 1.00; vs_factor += 0.05) {
             // init:
             TrajectoryGenerator::TrajectoryReference end{
                 // horizon:
@@ -375,7 +410,7 @@ TrajectoryGenerator::Trajectory Planner::get_optimized_trajectory(
     double t0 = ego_vehicle.get_time();
     if (t0 > 0.0) {
         const TrajectoryGenerator::TrajectoryParams &previous_trajectory_params = ego_vehicle.get_trajectory();
-        for (double t = 0.5 * stepsize; t < t0; t += stepsize) {
+        for (double t = 0.5 * stepsize; t < t0; t += 2.0 * stepsize) {
             double s = TrajectoryGenerator::evaluate_polynomial_derivative(t, previous_trajectory_params.s, 0);
             double d = TrajectoryGenerator::evaluate_polynomial_derivative(t, previous_trajectory_params.d, 0);
 
@@ -391,7 +426,7 @@ TrajectoryGenerator::Trajectory Planner::get_optimized_trajectory(
     }
 
     // newly generated trajectory:
-    for (double t = 0.5*stepsize; t < newly_generated_trajectory_params.T; t += stepsize) {
+    for (double t = 0.5*stepsize; t < newly_generated_trajectory_params.T; t += 2.0 * stepsize) {
         double s = TrajectoryGenerator::evaluate_polynomial_derivative(t, newly_generated_trajectory_params.s, 0);
         double d = TrajectoryGenerator::evaluate_polynomial_derivative(t, newly_generated_trajectory_params.d, 0);
 

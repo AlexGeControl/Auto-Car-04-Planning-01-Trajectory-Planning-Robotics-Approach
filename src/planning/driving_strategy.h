@@ -55,12 +55,28 @@ namespace DrivingStrategy {
         /**
          * flexibility
          */
-        static double get_flexibility_cost(const TrajectoryGenerator::TrajectoryReference &end, const LaneFeasibleZone &zone);
+        typedef struct {
+            double flexibility;
+            double space;
+            double leading;
+            double following;
+
+            double total;
+        } FlexibilityCost;
+        static FlexibilityCost get_flexibility_cost(const TrajectoryGenerator::TrajectoryReference &end, const LaneFeasibleZone &zone);
 
         /**
          * efficiency
          */
-        static double get_efficiency_cost(
+        typedef struct {
+            double s_reached;
+            double vs_reached;
+            double max_speed_reached;
+            double delta_d;
+
+            double total;
+        } EfficiencyCost;
+        static EfficiencyCost get_efficiency_cost(
             const TrajectoryGenerator::TrajectoryReference &start,
             const TrajectoryGenerator::TrajectoryReference &end, const LaneFeasibleZone &zone
         );

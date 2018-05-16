@@ -104,7 +104,7 @@ int main() {
 	Predictor predictor(map);
 
 	// planner:
-	double PLANNING_HORIZON = 2.00;
+	double PLANNING_HORIZON = 1.80;
 	double PLANNING_INTERVAL = 0.06;
 	Planner planner;
 
@@ -210,7 +210,6 @@ int main() {
 								debug = false;
 							} else {
 								if (previous_trajectory.N * ego_vehicle.STEPSIZE <= PLANNING_HORIZON - PLANNING_INTERVAL) {
-									// Object prediction:
 									auto predicted_object_list = predictor.predict(ego_vehicle, sensor_fusion, 0.0, ego_vehicle.STEPSIZE, PLANNING_HORIZON);
 									// Planning:
 									trajectory = planner.generate_trajectory(map, ego_vehicle, predicted_object_list, ego_vehicle.STEPSIZE, PLANNING_HORIZON);
@@ -225,7 +224,7 @@ int main() {
 								
 							// Actuate:
 							json msgJson;
-
+							
 							msgJson["next_x"] = trajectory.x;
 							msgJson["next_y"] = trajectory.y;
 
