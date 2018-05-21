@@ -211,7 +211,7 @@ std::map<int, DrivingStrategy::Highway::LaneFeasibleZone> Planner::get_lane_feas
                 0.5 * std::pow(horizon, 2.0) * effective_deceleration,
                 0.5 * std::pow(ego_trajectory_reference.vs, 2.0) / effective_deceleration
             );
-            lane_feasible_zone.s_upper = lane_feasible_zone.s_lower + std::min(
+            lane_feasible_zone.s_upper =  ego_vehicle.s + std::min(
                 // speed up at max acceleration
                 horizon * ego_trajectory_reference.vs + 0.5 * std::pow(horizon, 2.0) * effective_acceleration,
                 // constant speed at lane upper speed
