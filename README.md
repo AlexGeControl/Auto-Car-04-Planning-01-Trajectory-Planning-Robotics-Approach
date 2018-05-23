@@ -29,21 +29,21 @@ The detailed definition of incidents are as below:
 
 ### 1. The Car is Able to Keep Lane
 
-<img src="doc/lane-keeping-01.png" width="100%" alt="Lane Keeping Demo 01" />
+<img src="doc/performance-evaluation/lane-keeping-01.png" width="100%" alt="Lane Keeping Demo 01" />
 
-<img src="doc/lane-keeping-02.png" width="100%" alt="Lane Keeping Demo 02" />
+<img src="doc/performance-evaluation/lane-keeping-02.png" width="100%" alt="Lane Keeping Demo 02" />
 
 ### 2. The Car is Able to Change Lane
 
-<img src="doc/lane-change-01.png" width="100%" alt="Lane Change Demo 01" />
+<img src="doc/performance-evaluation/lane-change-01.png" width="100%" alt="Lane Change Demo 01" />
 
-<img src="doc/lane-change-02.png" width="100%" alt="Lane Change Demo 02" />
+<img src="doc/performance-evaluation/lane-change-02.png" width="100%" alt="Lane Change Demo 02" />
 
 ### 3. The Car is Able to Follow Leading Vehicle Without Collision
 
-<img src="doc/leading-vehicle-following-01.png" width="100%" alt="Leading Vehicle Following Demo 01" />
+<img src="doc/performance-evaluation/leading-vehicle-following-01.png" width="100%" alt="Leading Vehicle Following Demo 01" />
 
-<img src="doc/leading-vehicle-following-02.png" width="100%" alt="Leading Vehicle Following Demo 02" />
+<img src="doc/performance-evaluation/leading-vehicle-following-02.png" width="100%" alt="Leading Vehicle Following Demo 02" />
 
 ---
 
@@ -231,6 +231,26 @@ Current solution architecture is organized as follows:
 
 * Trajectory Optimization
     * Smooth the final trajectory using previously executed waypoints and newly generated waypoints through spline smoothing
+
+---
+
+## Notes on Motion Planning
+
+### 1. Ego Vehicle Feasible Zone Generation
+
+<img src="doc/motion-planning/01-feasible-zone-generation.png" width="100%" alt="Ego Vehicle Feasible Zone Generation" />
+
+### 2. Surrounding Object Prediction
+
+<img src="doc/motion-planning/02-prediction.png" width="100%" alt="Surrounding Object Prediction" />
+
+### 3. End Configuration Generation
+
+<img src="doc/motion-planning/03-end-configuration-generation.png" width="100%" alt="End Configuration Generation" />
+
+### 4. Trajectory Generation and Evaluation
+
+<img src="doc/motion-planning/04-trajectory-generation-and-evaluation.png" width="100%" alt="Trajectory Generation and Evaluation" />
 
 ---
 

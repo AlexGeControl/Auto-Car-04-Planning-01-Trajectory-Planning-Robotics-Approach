@@ -359,8 +359,8 @@ std::vector<TrajectoryGenerator::TrajectoryReference> Planner::generate_end_conf
     std::vector<TrajectoryGenerator::TrajectoryReference> result;
 
     // for (double delta_horizon = -0.10 * horizon; delta_horizon < +0.20 * horizon; delta_horizon += 0.10 * horizon) {
-    for (double s_factor = 0.10; s_factor <= 1.00; s_factor += 0.10) {
-        for (double vs_factor = 0.10; vs_factor <= 1.00; vs_factor += 0.05) {
+    for (double s_factor = 0.00; s_factor <= 1.00; s_factor += 0.10) {
+        for (double vs_factor = 0.00; vs_factor <= 1.00; vs_factor += 0.05) {
             // init:
             TrajectoryGenerator::TrajectoryReference end{
                 // horizon:
@@ -410,7 +410,7 @@ TrajectoryGenerator::Trajectory Planner::get_optimized_trajectory(
     double t0 = ego_vehicle.get_time();
     if (t0 > 0.0) {
         const TrajectoryGenerator::TrajectoryParams &previous_trajectory_params = ego_vehicle.get_trajectory();
-        for (double t = 0.5 * stepsize; t < t0; t += 2.0 * stepsize) {
+        for (double t = 0.5 * stepsize; t < t0; t += stepsize) {
             double s = TrajectoryGenerator::evaluate_polynomial_derivative(t, previous_trajectory_params.s, 0);
             double d = TrajectoryGenerator::evaluate_polynomial_derivative(t, previous_trajectory_params.d, 0);
 
@@ -426,7 +426,7 @@ TrajectoryGenerator::Trajectory Planner::get_optimized_trajectory(
     }
 
     // newly generated trajectory:
-    for (double t = 0.5*stepsize; t < newly_generated_trajectory_params.T; t += 2.0 * stepsize) {
+    for (double t = 0.5*stepsize; t < newly_generated_trajectory_params.T; t += stepsize) {
         double s = TrajectoryGenerator::evaluate_polynomial_derivative(t, newly_generated_trajectory_params.s, 0);
         double d = TrajectoryGenerator::evaluate_polynomial_derivative(t, newly_generated_trajectory_params.d, 0);
 
