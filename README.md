@@ -242,7 +242,7 @@ Current solution architecture is organized as follows:
 
 ### 2. Surrounding Object Prediction
 
-<img src="doc/motion-planning/02-prediction.png" width="100%" alt="Surrounding Object Prediction" />
+<img src="doc/motion-planning/02-surrounding-object-prediction.png" width="100%" alt="Surrounding Object Prediction" />
 
 ### 3. End Configuration Generation
 
